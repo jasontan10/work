@@ -35,7 +35,11 @@
 # REPEAT FOR NEXT CSV UNTIL ALL CSV's ARE READ
 # =====================================================
 #install.packages("dtplyr")
+#install.packages("data.table")
+#install.packages("stringi")
 library(dtplyr)
+library(data.table)
+library(stringi)
 save_output <- 1    # 1 - enabled, 0 - disabled
 
 # 1. Initialize data table with correct field names
@@ -92,7 +96,11 @@ for (csvfile in listofcsv){
 # Clean up the final database by adding Month, Week, Transaction Type
 final_dt[,TRANSACTION_TYPE:="CY Booked Sales"]
 final_dt[,MONTH:=format(final_dt[,ORDERED_DATE],"%b")]
-final_dt[,WEEK:=stri_datetime_fields(final_dt[,ORDERED_DATE])$WeekOfMonth]
+final_dt[,WEEK:=stri_datetime_fields(final_dt[,ORDERED_DATE])$WeekOfYear]
+
+final_dt <- final_dt[, .(CASE_QTY = sum(CASE_QTY), PADS_QTY = sum(PADS_QTY)),
+                      by = .(MONTH, WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID, DESCRIPTION, TRANSACTION_TYPE)][
+                          order(WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID)]
 
 if (save_output == 1){
     # Save data table into CSV's
