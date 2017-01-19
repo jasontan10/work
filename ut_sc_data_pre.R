@@ -100,7 +100,7 @@ final_dt[,WEEK:=stri_datetime_fields(final_dt[,ORDERED_DATE])$WeekOfYear]
 
 final_dt <- final_dt[, .(CASE_QTY = sum(CASE_QTY), PADS_QTY = sum(PADS_QTY)),
                       by = .(MONTH, WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID, DESCRIPTION, TRANSACTION_TYPE)][
-                          order(WEEK)]
+                          order(WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID)]
 
 if (save_output == 1){
     # Save data table into CSV's
