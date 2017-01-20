@@ -15,6 +15,7 @@
 # =====================================================
 # Procedure:
 # 1. Initialize data table with correct field names
+    #YEAR
     #MONTH
     #WEEK 
     #DATE 
@@ -43,7 +44,8 @@ library(stringi)
 save_output <- 1    # 1 - enabled, 0 - disabled
 
 # 1. Initialize data table with correct field names
-final_dt <- data.table( #MONTH = character(),
+final_dt <- data.table( #YEAR = integer(),
+                        #MONTH = character(),
                         #WEEK = integer(),
                         ORDERED_DATE = as.Date(character()),
                         SOLOMON_REGION = character(),
@@ -95,12 +97,13 @@ for (csvfile in listofcsv){
 
 # Clean up the final database by adding Month, Week, Transaction Type
 final_dt[,TRANSACTION_TYPE:="CY Booked Sales"]
+final_dt[,YEAR:=format(final_dt[,ORDERED_DATE],"%Y")]
 final_dt[,MONTH:=format(final_dt[,ORDERED_DATE],"%b")]
 final_dt[,WEEK:=stri_datetime_fields(final_dt[,ORDERED_DATE])$WeekOfYear]
 
 final_dt <- final_dt[, .(CASE_QTY = sum(CASE_QTY), PADS_QTY = sum(PADS_QTY)),
-                      by = .(MONTH, WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID, DESCRIPTION, TRANSACTION_TYPE)][
-                          order(WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID)]
+                      by = .(YEAR, MONTH, WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID, DESCRIPTION, TRANSACTION_TYPE)][
+                          order(YEAR, WEEK, SOLOMON_REGION, CATEGORY, INVENTORY_ID)]
 
 if (save_output == 1){
     # Save data table into CSV's
